@@ -1,10 +1,11 @@
 import requests
 from itertools import count
 from terminaltables import AsciiTable
+from environs import Env
 
 
 def predict_rub_salary_for_hh(url_vacancy):
-    if url_vacancy['salary'] is not None:
+    if url_vacancy['salary']:
         salary = url_vacancy['salary']
         if salary['currency'] == 'RUR':
             if salary['from'] is None:
@@ -33,101 +34,83 @@ def predict_rub_salary_for_superJob(url_vacancy):
         return None
 
 
-def find_develop_dict_for_hh():
-    developers = ['Python', 'JavaScript', 'Java', 'C++', 'C#', 'C', 'Go']
-    develop_dict_for_hh = {}
-    for developer in developers:
+def find_develop_vacancy_on_hh():
+    name_of_programming_languages = ['Python', 'JavaScript', 'Java', 'C++', 'C#', 'C', 'Go']
+    develop_vacancy_on_hh = {}
+    for language in name_of_programming_languages:
         programming_language = {}
         vacancies = []
+        city = '1'
+        period = '30'
         for page in count(0):
-            payload = {'text': f'программист {developer}', 'area': '1', 'period': '30', 'page': page}
+            payload = {'text': f'программист {language}', 'area': city, 'period': period, 'page': page}
             page_response = requests.get('https://api.hh.ru/vacancies', params=payload)
             page_response.raise_for_status()
             page_payload = page_response.json()
-            for page_vacancy in page_payload['items']:
-                vacancies.append(page_vacancy)
+            vacancies.extend(page_payload['items'])
             if page == page_payload['pages'] - 1:
                 break
-        i = 0
-        all_salary = []
-        sum_of_salary = 0
+        all_salaries = []
         for vacancy in vacancies:
-            if predict_rub_salary_for_hh(vacancy) is not None:
-                all_salary.append(predict_rub_salary_for_hh(vacancy))
-                i += 1
-                sum_of_salary = sum_of_salary + predict_rub_salary_for_hh(vacancy)
-        average_salary = sum_of_salary / i
-        programming_language['vacancies_found'] = len(vacancies)
-        programming_language['vacancies_processed'] = i
+            salary_for_vacancy = predict_rub_salary_for_hh(vacancy)
+            if salary_for_vacancy:
+                all_salaries.append(salary_for_vacancy)
+        if len(all_salaries) != 0:
+            average_salary = sum(all_salaries) / len(all_salaries)
+        programming_language['vacancies_found'] = page_payload['found']
+        programming_language['vacancies_processed'] = len(all_salaries)
         programming_language['average_salary'] = int(average_salary)
+        develop_vacancy_on_hh[language] = programming_language
+    return develop_vacancy_on_hh
 
-        develop_dict_for_hh[developer] = programming_language
-    return develop_dict_for_hh
 
-
-def find_develop_dict_for_superJob():
-    developers = ['Python', 'JavaScript', 'Java', 'C++', 'C#', 'C', 'Go']
-    develop_dict_for_superJob = {}
-    for developer in developers:
+def find_develop_vacancy_on_superJob():
+    name_of_programming_languages = ['Python', 'JavaScript', 'Java', 'C++', 'C#', 'C', 'Go']
+    develop_vacancy_on_superJob = {}
+    for language in name_of_programming_languages:
         programming_language = {}
         vacancies = []
+        city = '4'
         for page in count(0):
-            payload = {'t': '4', 'keyword': f'программист {developer}'}
-            headers = {
-            'X-Api-App-Id': 'v3.r.137964674.8f78016b701cf978a5ef350fe7ad05cd1ff5d324.d3ee76c54c90e6cda16f6b0546c58c1333a2306c'
-            }
+            payload = {'t': city, 'keyword': f'программист {language}'}
+            headers = {superJob_token}
             page_response = requests.get("https://api.superjob.ru/2.0/vacancies", headers=headers, params=payload)
             page_response.raise_for_status()
             page_payload = page_response.json()
-            for page_vacancy in page_payload['objects']:
-                vacancies.append(page_vacancy)
+            vacancies.extend(page_payload['objects'])
             if page == page_payload['pages'] - 1:
                 break
-        i = 0
-        all_salary = []
-        sum_of_salary = 0
+        all_salaries = []
         for vacancy in vacancies:
-            if predict_rub_salary_for_superJob(vacancy) is not None:
-                all_salary.append(predict_rub_salary_for_superJob(vacancy))
-                i += 1
-                sum_of_salary = sum_of_salary + predict_rub_salary_for_superJob(vacancy)
-        average_salary = sum_of_salary / i
-        programming_language['vacancies_found'] = len(vacancies)
-        programming_language['vacancies_processed'] = i
+            salary_for_vacancy = predict_rub_salary_for_superJob(vacancy)
+            if salary_for_vacancy:
+                all_salaries.append(salary_for_vacancy)
+        if len(all_salaries) != 0:
+            average_salary = sum(all_salaries) / len(all_salaries)
+        programming_language['vacancies_found'] = page_payload['total']
+        programming_language['vacancies_processed'] = len(all_salaries)
         programming_language['average_salary'] = int(average_salary)
 
-        develop_dict_for_superJob[developer] = programming_language
-    return develop_dict_for_superJob
+        develop_vacancy_on_superJob[language] = programming_language
+    return develop_vacancy_on_superJob
 
 
-def do_table_for_superJob(develop_dict_for_superJob):
-    TABLE_DATA = ()
-    list_for_table = [('Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата')]
-    for key in develop_dict_for_superJob.keys():
-        part_of_tuple = (key, develop_dict_for_superJob[key]['vacancies_found'], develop_dict_for_superJob[key]['vacancies_processed'], develop_dict_for_superJob[key]['average_salary'])
-        list_for_table.append(part_of_tuple)
-    TABLE_DATA = tuple(list_for_table)
-    title = 'SuperJob Moscow'
-    table_instance = AsciiTable(TABLE_DATA, title)
+def do_table(develop_vacancy):
+    table_data = ()
+    salary_table = [('Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата')]
+    for programming_language in develop_vacancy.keys():
+        part_of_tuple = (programming_language, develop_vacancy[programming_language]['vacancies_found'], develop_vacancy[programming_language]['vacancies_processed'], develop_vacancy[programming_language]['average_salary'])
+        salary_table.append(part_of_tuple)
+    table_data = tuple(salary_table)
+    title = 'Moscow'
+    table_instance = AsciiTable(table_data, title)
     table_instance.justify_columns[3] = 'right'
-    print(table_instance.table)
-    print()
+    return table_instance.table
 
 
-def do_table_for_hh(develop_dict_for_hh):
-    TABLE_DATA = ()
-    list_for_table = [('Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата')]
-    for key in develop_dict_for_hh.keys():
-        part_of_tuple = (key, develop_dict_for_hh[key]['vacancies_found'], develop_dict_for_hh[key]['vacancies_processed'], develop_dict_for_hh[key]['average_salary'])
-        list_for_table.append(part_of_tuple)
-    TABLE_DATA = tuple(list_for_table)
-    print(TABLE_DATA)
-    title = 'HeadHunter Moscow'
-    table_instance = AsciiTable(TABLE_DATA, title)
-    table_instance.justify_columns[3] = 'right'
-    print(table_instance.table)
-    print()
-
-
-do_table_for_hh(find_develop_dict_for_hh())
-do_table_for_superJob(find_develop_dict_for_superJob())
+if __name__ == '__main__':
+    env = Env()
+    env.read_env()
+    superJob_token = env.str('SUPER_JOB_TOKEN')
+    print(do_table(find_develop_vacancy_on_hh()))
+    print(do_table(find_develop_vacancy_on_superJob()))
