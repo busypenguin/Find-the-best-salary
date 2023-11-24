@@ -4,17 +4,21 @@ from terminaltables import AsciiTable
 from environs import Env
 
 
+def count_salary(payment_from, payment_to):
+    if payment_from is None or payment_from == 0:
+        expected_salary = payment_to*0.8
+    elif payment_to is None or payment_to == 0:
+        expected_salary = payment_from*1.2
+    else:
+        expected_salary = (payment_from+payment_to)/2
+    return int(expected_salary)
+
+
 def predict_rub_salary_for_hh(url_vacancy):
-    if url_vacancy['salary']:
+    if url_vacancy['salary'] is None:
         salary = url_vacancy['salary']
         if salary['currency'] == 'RUR':
-            if salary['from'] is None:
-                expected_salary = salary['to']*0.8
-            elif salary['to'] is None:
-                expected_salary = salary['from']*1.2
-            else:
-                expected_salary = (salary['from']+salary['to'])/2
-            return int(expected_salary)
+            return count_salary(salary['from'], salary['to'])
         else:
             return None
 
@@ -23,13 +27,7 @@ def predict_rub_salary_for_superJob(url_vacancy):
     if url_vacancy['payment_from'] == 0 and url_vacancy['payment_to'] == 0:
         return None
     if url_vacancy['currency'] == 'rub':
-        if url_vacancy['payment_from'] == 0:
-            expected_salary = url_vacancy['payment_to']*0.8
-        elif url_vacancy['payment_to'] == 0:
-            expected_salary = url_vacancy['payment_from']*1.2
-        else:
-            expected_salary = (url_vacancy['payment_from']+url_vacancy['payment_to'])/2
-        return int(expected_salary)
+        return count_salary(url_vacancy['payment_from'], url_vacancy['payment_to'])
     else:
         return None
 
@@ -98,8 +96,8 @@ def find_develop_vacancy_on_superJob():
 def do_table(develop_vacancy):
     table_data = ()
     salary_table = [('Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата')]
-    for programming_language in develop_vacancy.keys():
-        part_of_tuple = (programming_language, develop_vacancy[programming_language]['vacancies_found'], develop_vacancy[programming_language]['vacancies_processed'], develop_vacancy[programming_language]['average_salary'])
+    for programming_language, vacancies in develop_vacancy.items():
+        part_of_tuple = (programming_language, vacancies['vacancies_found'], vacancies['vacancies_processed'], vacancies['average_salary'])
         salary_table.append(part_of_tuple)
     table_data = tuple(salary_table)
     title = 'Moscow'
