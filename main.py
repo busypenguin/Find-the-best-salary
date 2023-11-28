@@ -14,13 +14,17 @@ def count_salary(payment_from, payment_to):
     return int(expected_salary)
 
 
+def is_rub_salary_for_hh(url_vacancy):
+    salary = url_vacancy['salary']
+    if url_vacancy['currency'] == 'RUR' or url_vacancy['currency'] == 'rub':
+        return count_salary(salary['from'], salary['to'])
+    else:
+        return None
+
+
 def predict_rub_salary_for_hh(url_vacancy):
     if url_vacancy['salary'] is None:
-        salary = url_vacancy['salary']
-        if salary['currency'] == 'RUR':
-            return count_salary(salary['from'], salary['to'])
-        else:
-            return None
+        is_rub_salary_for_hh(url_vacancy)
 
 
 def predict_rub_salary_for_superJob(url_vacancy):
