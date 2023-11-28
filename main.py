@@ -36,7 +36,6 @@ def get_statistics_of_develop_vacancies_on_hh():
     name_of_programming_languages = ['Python', 'JavaScript', 'Java', 'C++', 'C#', 'C', 'Go']
     develop_vacancy_on_hh = {}
     for language in name_of_programming_languages:
-        programming_language = {}
         vacancies = []
         city = '1'
         period = '30'
@@ -64,11 +63,10 @@ def get_statistics_of_develop_vacancies_on_hh():
     return develop_vacancy_on_hh
 
 
-def get_statistics_of_develop_vacancies_on_superJob():
+def get_statistics_of_develop_vacancies_on_superJob(superJob_token):
     name_of_programming_languages = ['Python', 'JavaScript', 'Java', 'C++', 'C#', 'C', 'Go']
     develop_vacancy_on_superJob = {}
     for language in name_of_programming_languages:
-        programming_language = {}
         vacancies = []
         city = '4'
         for page in count(0):
@@ -114,4 +112,4 @@ if __name__ == '__main__':
     env.read_env()
     superJob_token = env.str('SUPER_JOB_TOKEN')
     print(do_table(get_statistics_of_develop_vacancies_on_hh()))
-    print(do_table(get_statistics_of_develop_vacancies_on_superJob()))
+    print(do_table(get_statistics_of_develop_vacancies_on_superJob(superJob_token)))
