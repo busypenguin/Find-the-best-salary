@@ -5,9 +5,9 @@ from environs import Env
 
 
 def count_salary(payment_from, payment_to):
-    if payment_from is None or payment_from == 0:
+    if payment_from is None or not payment_from:
         expected_salary = payment_to*0.8
-    elif payment_to is None or payment_to == 0:
+    elif payment_to is None or not payment_to:
         expected_salary = payment_from*1.2
     else:
         expected_salary = (payment_from+payment_to)/2
@@ -24,7 +24,7 @@ def predict_rub_salary_for_hh(url_vacancy):
 
 
 def predict_rub_salary_for_superJob(url_vacancy):
-    if url_vacancy['payment_from'] == 0 and url_vacancy['payment_to'] == 0:
+    if not url_vacancy['payment_from'] and not url_vacancy['payment_to']:
         return None
     if url_vacancy['currency'] == 'rub':
         return count_salary(url_vacancy['payment_from'], url_vacancy['payment_to'])
@@ -52,7 +52,7 @@ def get_statistics_of_develop_vacancies_on_hh():
             salary_for_vacancy = predict_rub_salary_for_hh(vacancy)
             if salary_for_vacancy:
                 all_salaries.append(salary_for_vacancy)
-        if len(all_salaries) != 0:
+        if len(all_salaries):
             average_salary = sum(all_salaries) / len(all_salaries)
         programming_language = {
             'vacancies_found': page_payload['found'],
@@ -83,7 +83,7 @@ def get_statistics_of_develop_vacancies_on_superJob(superJob_token):
             salary_for_vacancy = predict_rub_salary_for_superJob(vacancy)
             if salary_for_vacancy:
                 all_salaries.append(salary_for_vacancy)
-        if len(all_salaries) != 0:
+        if len(all_salaries):
             average_salary = sum(all_salaries) / len(all_salaries)
         programming_language = {
             'vacancies_found': page_payload['found'],
