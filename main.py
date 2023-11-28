@@ -97,8 +97,8 @@ def do_table(develop_vacancy):
     table_data = ()
     salary_table = [('Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата')]
     for programming_language, vacancies in develop_vacancy.items():
-        part_of_tuple = (programming_language, vacancies['vacancies_found'], vacancies['vacancies_processed'], vacancies['average_salary'])
-        salary_table.append(part_of_tuple)
+        part_of_table = (programming_language, vacancies['vacancies_found'], vacancies['vacancies_processed'], vacancies['average_salary'])
+        salary_table.append(part_of_table)
     table_data = tuple(salary_table)
     title = 'Moscow'
     table_instance = AsciiTable(table_data, title)
