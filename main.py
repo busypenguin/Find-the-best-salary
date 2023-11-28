@@ -32,7 +32,7 @@ def predict_rub_salary_for_superJob(url_vacancy):
         return None
 
 
-def find_develop_vacancy_on_hh():
+def get_statistics_of_develop_vacancies_on_hh():
     name_of_programming_languages = ['Python', 'JavaScript', 'Java', 'C++', 'C#', 'C', 'Go']
     develop_vacancy_on_hh = {}
     for language in name_of_programming_languages:
@@ -62,7 +62,7 @@ def find_develop_vacancy_on_hh():
     return develop_vacancy_on_hh
 
 
-def find_develop_vacancy_on_superJob():
+def get_statistics_of_develop_vacancies_on_superJob():
     name_of_programming_languages = ['Python', 'JavaScript', 'Java', 'C++', 'C#', 'C', 'Go']
     develop_vacancy_on_superJob = {}
     for language in name_of_programming_languages:
@@ -110,5 +110,5 @@ if __name__ == '__main__':
     env = Env()
     env.read_env()
     superJob_token = env.str('SUPER_JOB_TOKEN')
-    print(do_table(find_develop_vacancy_on_hh()))
-    print(do_table(find_develop_vacancy_on_superJob()))
+    print(do_table(get_statistics_of_develop_vacancies_on_hh()))
+    print(do_table(get_statistics_of_develop_vacancies_on_superJob()))
