@@ -5,9 +5,9 @@ from environs import Env
 
 
 def count_salary(payment_from, payment_to):
-    if payment_from is None or not payment_from:
+    if not payment_from:
         expected_salary = payment_to*0.8
-    elif payment_to is None or not payment_to:
+    elif not payment_to:
         expected_salary = payment_from*1.2
     else:
         expected_salary = (payment_from+payment_to)/2
@@ -16,19 +16,19 @@ def count_salary(payment_from, payment_to):
 
 def is_rub_salary_for_hh(url_vacancy):
     salary = url_vacancy['salary']
-    if url_vacancy['currency'] == 'RUR' or url_vacancy['currency'] == 'rub':
+    if url_vacancy['salary']['currency'] == 'RUR':
         return count_salary(salary['from'], salary['to'])
     else:
         return None
 
 
 def predict_rub_salary_for_hh(url_vacancy):
-    if url_vacancy['salary'] is None:
+    if not url_vacancy['salary']:
         is_rub_salary_for_hh(url_vacancy)
 
 
 def predict_rub_salary_for_superJob(url_vacancy):
-    if not url_vacancy['payment_from'] and not url_vacancy['payment_to']:
+    if not url_vacancy['payment_to']:
         return None
     if url_vacancy['currency'] == 'rub':
         return count_salary(url_vacancy['payment_from'], url_vacancy['payment_to'])
@@ -49,13 +49,17 @@ def get_statistics_of_develop_vacancies_on_hh():
             page_response.raise_for_status()
             page_payload = page_response.json()
             vacancies.extend(page_payload['items'])
-            if page == page_payload['pages'] - 1:
+            if page == 10:
+            ###if page == page_payload['pages'] - 1:
                 break
         all_salaries = []
         for vacancy in vacancies:
             salary_for_vacancy = predict_rub_salary_for_hh(vacancy)
             if salary_for_vacancy:
                 all_salaries.append(salary_for_vacancy)
+            else:
+                all_salaries = 0
+                average_salary = 0
         if len(all_salaries):
             average_salary = sum(all_salaries) / len(all_salaries)
         programming_language = {
@@ -80,13 +84,17 @@ def get_statistics_of_develop_vacancies_on_superJob(superJob_token):
             page_response.raise_for_status()
             page_payload = page_response.json()
             vacancies.extend(page_payload['objects'])
-            if page == page_payload['pages'] - 1:
+            if page == 10:
+            ###if page == page_payload['pages'] - 1:
                 break
         all_salaries = []
         for vacancy in vacancies:
             salary_for_vacancy = predict_rub_salary_for_superJob(vacancy)
             if salary_for_vacancy:
                 all_salaries.append(salary_for_vacancy)
+            else:
+                all_salaries = 0
+                average_salary = 0
         if len(all_salaries):
             average_salary = sum(all_salaries) / len(all_salaries)
         programming_language = {
