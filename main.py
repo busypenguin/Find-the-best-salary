@@ -14,26 +14,21 @@ def count_salary(payment_from, payment_to):
     return int(expected_salary)
 
 
-def is_rub_salary_for_hh(url_vacancy):
-    salary = url_vacancy['salary']
-    if url_vacancy['salary']['currency'] == 'RUR':
+def predict_rub_salary_for_hh(vacancy):
+    salary = vacancy['salary']
+    if not vacancy['salary']:
+        return None
+    if vacancy['salary']['currency'] == 'RUR':
         return count_salary(salary['from'], salary['to'])
     else:
         return None
 
 
-def predict_rub_salary_for_hh(url_vacancy):
-    if not url_vacancy['salary']:
-        is_rub_salary_for_hh(url_vacancy)
-
-
-def predict_rub_salary_for_superJob(url_vacancy):
-    if not url_vacancy['payment_to']:
+def predict_rub_salary_for_superJob(vacancy):
+    if not vacancy['payment_to']:
         return None
-    if url_vacancy['currency'] == 'rub':
-        return count_salary(url_vacancy['payment_from'], url_vacancy['payment_to'])
-    else:
-        return None
+    if vacancy['currency'] == 'rub':
+        return count_salary(vacancy['payment_from'], vacancy['payment_to'])
 
 
 def get_statistics_of_develop_vacancies_on_hh():
@@ -49,24 +44,26 @@ def get_statistics_of_develop_vacancies_on_hh():
             page_response.raise_for_status()
             page_payload = page_response.json()
             vacancies.extend(page_payload['items'])
-            if page == 10:
-            ###if page == page_payload['pages'] - 1:
+            if page == page_payload['pages'] - 1:
                 break
         all_salaries = []
         for vacancy in vacancies:
             salary_for_vacancy = predict_rub_salary_for_hh(vacancy)
             if salary_for_vacancy:
                 all_salaries.append(salary_for_vacancy)
-            else:
-                all_salaries = 0
-                average_salary = 0
         if len(all_salaries):
             average_salary = sum(all_salaries) / len(all_salaries)
-        programming_language = {
-            'vacancies_found': page_payload['found'],
-            'vacancies_processed': len(all_salaries),
-            'average_salary': int(average_salary)
-        }
+            programming_language = {
+                'vacancies_found': page_payload['found'],
+                'vacancies_processed': len(all_salaries),
+                'average_salary': int(average_salary)
+            }
+        else:
+            programming_language = {
+                'vacancies_found': page_payload['found'],
+                'vacancies_processed': 0,
+                'average_salary': 0
+            }
         develop_vacancy_on_hh[language] = programming_language
     return develop_vacancy_on_hh
 
@@ -84,24 +81,26 @@ def get_statistics_of_develop_vacancies_on_superJob(superJob_token):
             page_response.raise_for_status()
             page_payload = page_response.json()
             vacancies.extend(page_payload['objects'])
-            if page == 10:
-            ###if page == page_payload['pages'] - 1:
+            if page == page_payload['pages'] - 1:
                 break
         all_salaries = []
         for vacancy in vacancies:
             salary_for_vacancy = predict_rub_salary_for_superJob(vacancy)
             if salary_for_vacancy:
                 all_salaries.append(salary_for_vacancy)
-            else:
-                all_salaries = 0
-                average_salary = 0
         if len(all_salaries):
             average_salary = sum(all_salaries) / len(all_salaries)
-        programming_language = {
-            'vacancies_found': page_payload['found'],
-            'vacancies_processed': len(all_salaries),
-            'average_salary': int(average_salary)
-        }
+            programming_language = {
+                'vacancies_found': page_payload['found'],
+                'vacancies_processed': len(all_salaries),
+                'average_salary': int(average_salary)
+            }
+        else:
+            programming_language = {
+                'vacancies_found': page_payload['found'],
+                'vacancies_processed': 0,
+                'average_salary': 0
+            }
         develop_vacancy_on_superJob[language] = programming_language
     return develop_vacancy_on_superJob
 
