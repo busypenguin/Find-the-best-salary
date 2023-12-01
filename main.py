@@ -53,17 +53,13 @@ def get_statistics_of_develop_vacancies_on_hh():
                 all_salaries.append(salary_for_vacancy)
         if len(all_salaries):
             average_salary = sum(all_salaries) / len(all_salaries)
-            programming_language = {
-                'vacancies_found': page_payload['found'],
-                'vacancies_processed': len(all_salaries),
-                'average_salary': int(average_salary)
-            }
         else:
-            programming_language = {
-                'vacancies_found': page_payload['found'],
-                'vacancies_processed': 0,
-                'average_salary': 0
-            }
+            average_salary = 0
+        programming_language = {
+            'vacancies_found': page_payload['found'],
+            'vacancies_processed': len(all_salaries),
+            'average_salary': int(average_salary)
+        }
         develop_vacancy_on_hh[language] = programming_language
     return develop_vacancy_on_hh
 
@@ -90,17 +86,13 @@ def get_statistics_of_develop_vacancies_on_superJob(superJob_token):
                 all_salaries.append(salary_for_vacancy)
         if len(all_salaries):
             average_salary = sum(all_salaries) / len(all_salaries)
-            programming_language = {
-                'vacancies_found': page_payload['found'],
-                'vacancies_processed': len(all_salaries),
-                'average_salary': int(average_salary)
-            }
         else:
-            programming_language = {
-                'vacancies_found': page_payload['found'],
-                'vacancies_processed': 0,
-                'average_salary': 0
-            }
+            average_salary = 0
+        programming_language = {
+            'vacancies_found': page_payload['found'],
+            'vacancies_processed': len(all_salaries),
+            'average_salary': int(average_salary)
+        }
         develop_vacancy_on_superJob[language] = programming_language
     return develop_vacancy_on_superJob
 
